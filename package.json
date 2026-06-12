@@ -1,0 +1,23 @@
+{
+  "name": "hospital-admin-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NickBaynham/hospital-admin-test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/NickBaynham/hospital-admin-test/issues"
+  },
+  "homepage": "https://github.com/NickBaynham/hospital-admin-test#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.9.3"
+  }
+}
