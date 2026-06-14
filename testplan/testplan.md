@@ -12,6 +12,34 @@
 | Application under test | Hospital Appointment Management (`../hospital-admin`) |
 | Version / build | [git sha or tag] |
 
+## Status summary
+
+Current state of the automated suite (`tests/`, Playwright + TypeScript).
+
+| Metric | Value |
+| --- | --- |
+| Total automated tests | **59** (52 functional passing + 7 known-defect regressions, red by design) |
+| API functional | 26 — appointments, patients, doctors, departments (CRUD, filters, validation, relationships) |
+| UI end-to-end | 26 — dashboard, create-appointment, form validation, appointment list/filters/row-actions, patient + doctor CRUD, navigation |
+| Regression (known defects) | 7 red — BUG-01/02/03/06/07/08/09 |
+| Layers | UI (page objects + `NavBar` component), API (request fixtures), **Database** (`db` fixture, MongoDB) |
+| Requirement coverage | 0 uncovered of 54; run-grounded: 27 automated-pass, 8 automated-failing, 19 seed-only ([coverage-map.md](coverage-map.md)) |
+| Confirmed defects | 9 logged (section 9); 5 automated as red regressions |
+| CI | Functional gate (blocking) + regression watch (non-blocking); records build under test |
+
+**Infrastructure:** shared fixtures with auto-reset isolation; data-driven validation cases;
+page objects + a navigation component; database-layer assertions; per-run build provenance
+([§6.1](#61-build-under-test-recorded-in-every-report)); BDD living documentation
+([bdd/index.md](../.test-commander/bdd/index.md)); and a curated requirement→test
+[coverage map](coverage-map.md).
+
+**Assessment:** the critical paths and the full CRUD/list/validation surface are covered
+across all three layers (UI/API/DB), with known defects pinned by red regression tests.
+Remaining gaps are small and mostly blocked or deviations: doctor active-toggle/availability
+UI editing (REQ-014 UI); Checked In / No Show statuses (blocked — BUG-05, app implements only
+three); and the unimplemented `date`/doctor-search filters (REQ-048/REQ-015 — pending a
+defect-vs-out-of-scope ruling).
+
 ## 1. Introduction
 
 [One paragraph: what this plan covers and why. The application is a full-stack hospital
