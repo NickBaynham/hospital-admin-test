@@ -51,7 +51,7 @@ test.describe('Appointments API', () => {
     expect(filtered.every((a: any) => a.doctor_id === doctorId)).toBeTruthy();
   });
 
-  test('REQ-034 transitions an appointment status to cancelled', async ({ request, seeded }) => {
+  test('REQ-034 transitions an appointment status to cancelled', async ({ request, seeded, db }) => {
     const scheduled = seeded.appointments.find((a) => a.status === 'scheduled')!;
     const patch = await request.patch(`${API}/appointments/${scheduled.id}/status`, {
       data: { status: 'cancelled' },
@@ -59,6 +59,10 @@ test.describe('Appointments API', () => {
     expect(patch.ok()).toBeTruthy();
     const fetched = await getJson(request, `/appointments/${scheduled.id}`);
     expect(fetched.status).toBe('cancelled');
+
+    // DB assertion: the status change is persisted in MongoDB.
+    const stored = await db.findById('appointments', scheduled.id);
+    expect(stored!.status, 'status update must persist').toBe('cancelled');
   });
 
   // REQ-031 / REQ-032: appointment_type and priority are constrained enums (data-driven).

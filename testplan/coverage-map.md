@@ -74,8 +74,8 @@ Status legend:
 | REQ-047 | Patients search query | Automated (red) | regression BUG-06 |
 | REQ-048 | Appointments date filter | Uncovered | Not implemented (gap) |
 | REQ-049 | Status codes + reject invalid payloads | Partial | API negative tests assert >=400; ui/validation surfaces server + client errors in `error-message` |
-| REQ-050 | MongoDB collections | Uncovered | No direct DB-layer assertions |
-| REQ-051 | Appointment stores relationship refs | Partial | Asserted via API response, not at DB |
+| REQ-050 | MongoDB collections | Partial | DB tests query the patients/doctors/appointments collections directly (users/departments not yet asserted) |
+| REQ-051 | Appointment stores relationship refs | Automated | DB assertion: appointment create stores patient_id/doctor_id/department_id as ObjectId refs (`appointment-create.spec.ts`) |
 | REQ-052 | Seed loads baseline | Implicit | Tests depend on the seed |
 | REQ-053 | Reset to clean state | Implicit | Tests depend on reset |
 | REQ-054 | Delete leaves no orphans | Automated | patients + doctors: referential integrity tests |

@@ -13,7 +13,7 @@ test.describe('Patients API', () => {
     expect(seeded.patients.every((p) => typeof p.id === 'string' && p.name)).toBeTruthy();
   });
 
-  test('REQ-016 creates a patient and reads it back', async ({ request }) => {
+  test('REQ-016 creates a patient and reads it back', async ({ request, db }) => {
     const body = patientPayload({ name: 'Grace Hopper' });
     const created = await request.post(`${API}/patients`, { data: body });
     expect(created.status(), 'valid patient should be created').toBe(201);
@@ -26,6 +26,13 @@ test.describe('Patients API', () => {
 
     const list = await getJson(request, '/patients');
     expect(list.some((p: any) => p.id === patient.id)).toBeTruthy();
+
+    // DB assertion: the document is stored with the exact field values.
+    const stored = await db.findById('patients', patient.id);
+    expect(stored, 'patient exists in MongoDB').toBeTruthy();
+    expect(stored!.name).toBe('Grace Hopper');
+    expect(stored!.email).toBe(body.email);
+    expect(stored!.date_of_birth).toBe(body.date_of_birth);
   });
 
   test('REQ-024 updates a patient', async ({ request }) => {

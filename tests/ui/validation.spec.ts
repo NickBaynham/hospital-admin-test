@@ -1,99 +1,102 @@
 import { test, expect } from '../fixtures';
+import { CreateAppointmentPage } from '../pages/CreateAppointmentPage';
+import { PatientsPage } from '../pages/PatientsPage';
+import { DoctorsPage } from '../pages/DoctorsPage';
 
 /**
- * UI validation coverage: how the forms surface validation. Server errors appear in
- * the `error-message` element; the appointment form adds a "symptoms >= 10 chars" check.
- * Duplicate-email cases read the existing email from the seed fixture (data-driven).
+ * UI validation coverage via page objects. Server errors appear in the page's
+ * error message; the appointment form adds a "symptoms >= 10 chars" check.
  */
 test.describe('Form validation (UI)', () => {
   test('REQ-019 patient form surfaces a server error for a duplicate email', async ({
     page,
     seeded,
+    db,
   }) => {
-    const existingEmail = seeded.patients[0].email;
-    await page.goto('/patients');
+    const patients = new PatientsPage(page);
+    await patients.goto();
+    await patients.fill({
+      name: 'Dup Patient',
+      email: seeded.patients[0].email, // existing seed email
+      phone: '555-111-2222',
+      dob: '1990-01-01',
+      gender: 'female',
+      insurance: 'Blue Shield',
+    });
+    await patients.submit();
 
-    await page.getByTestId('patient-name-input').fill('Dup Patient');
-    await page.getByTestId('patient-email-input').fill(existingEmail);
-    await page.getByTestId('patient-phone-input').fill('555-111-2222');
-    await page.getByTestId('patient-dob-input').fill('1990-01-01');
-    await page.getByTestId('patient-gender-female').check();
-    await page.getByTestId('insurance-provider-select').selectOption({ label: 'Blue Shield' });
-    await page.getByTestId('create-patient-submit').click();
-
-    await expect(page.getByTestId('error-message')).toBeVisible();
-    await expect(page.getByTestId('error-message')).not.toBeEmpty();
-    expect(seeded.patients.length, 'baseline patient count').toBe(3);
+    await expect(patients.errorMessage()).toBeVisible();
+    await expect(patients.errorMessage()).not.toBeEmpty();
+    // DB assertion: the rejected patient was not written.
+    expect(await db.count('patients'), 'no patient added on duplicate email').toBe(3);
   });
 
   test('REQ-013 doctor form surfaces a server error for a duplicate email', async ({
     page,
     seeded,
+    db,
   }) => {
-    const existingEmail = seeded.doctors[0].email;
-    await page.goto('/doctors');
+    const doctors = new DoctorsPage(page);
+    await doctors.goto();
+    await doctors.fill({
+      name: 'Dr. Dup',
+      email: seeded.doctors[0].email, // existing seed email
+      department: 'Cardiology',
+      specialty: 'Cardiology',
+      availability: ['Monday'],
+    });
+    await doctors.submit();
 
-    await page.getByTestId('doctor-name-input').fill('Dr. Dup');
-    await page.getByTestId('doctor-email-input').fill(existingEmail);
-    await page.getByTestId('doctor-department-select').selectOption({ label: 'Cardiology' });
-    await page.getByTestId('doctor-specialty-input').fill('Cardiology');
-    await page.getByTestId('doctor-availability-Monday').check();
-    await page.getByTestId('create-doctor-submit').click();
-
-    await expect(page.getByTestId('error-message')).toBeVisible();
-    await expect(page.getByTestId('error-message')).not.toBeEmpty();
+    await expect(doctors.errorMessage()).toBeVisible();
+    await expect(doctors.errorMessage()).not.toBeEmpty();
+    expect(await db.count('doctors'), 'no doctor added on duplicate email').toBe(4);
   });
 
   test('REQ-049 appointment form shows a client-side error for too-short symptoms', async ({
     page,
-    request,
-    seeded,
+    db,
   }) => {
-    const before = seeded.appointments.length;
-    await page.goto('/appointments/new');
+    const form = new CreateAppointmentPage(page);
+    await form.goto();
+    await form.fill({
+      department: 'Cardiology',
+      doctor: 'Dr. Sarah Chen',
+      patient: 'John Smith',
+      date: '2030-05-20',
+      time: '11:00',
+      type: 'consultation',
+      priority: 'routine',
+      symptoms: 'short', // < 10 chars
+    });
+    await form.submit();
 
-    await page.getByTestId('appointment-department-select').selectOption({ label: 'Cardiology' });
-    await page.getByTestId('appointment-doctor-select').selectOption({ label: 'Dr. Sarah Chen' });
-    await page.getByTestId('appointment-patient-select').selectOption({ label: 'John Smith' });
-    await page.getByTestId('appointment-date-input').fill('2030-05-20');
-    await page.getByTestId('appointment-time-input').fill('11:00');
-    await page.getByTestId('appointment-type-select').selectOption({ label: 'consultation' });
-    await page.getByTestId('appointment-priority-routine').check();
-    await page.getByTestId('appointment-symptoms-textarea').fill('short'); // < 10 chars
-
-    await page.getByTestId('create-appointment-submit').click();
-
-    await expect(page.getByTestId('error-message')).toHaveText('Symptoms must be at least 10 characters');
+    await expect(form.errorMessage()).toHaveText('Symptoms must be at least 10 characters');
     await expect(page).toHaveURL(/\/appointments\/new$/);
-    const after = await request.get(`${seeded.api}/appointments`);
-    expect((await after.json()).length, 'no appointment created').toBe(before);
+    expect(await db.count('appointments'), 'no appointment created').toBe(3);
   });
 
-  // BUG-04 follow-up: an incomplete form (a required field left unset) does not submit.
-  // The form relies on native HTML5 `required` validation (no in-app error-message).
+  // BUG-04 follow-up: native HTML5 `required` blocks an incomplete submit (no in-app message).
   test('REQ-049 appointment form blocks submission when a required field is unset', async ({
     page,
-    request,
-    seeded,
+    db,
   }) => {
-    const before = seeded.appointments.length;
-    await page.goto('/appointments/new');
-
-    // Fill everything valid EXCEPT priority.
-    await page.getByTestId('appointment-department-select').selectOption({ label: 'Cardiology' });
-    await page.getByTestId('appointment-doctor-select').selectOption({ label: 'Dr. Sarah Chen' });
-    await page.getByTestId('appointment-patient-select').selectOption({ label: 'John Smith' });
-    await page.getByTestId('appointment-date-input').fill('2030-05-20');
-    await page.getByTestId('appointment-time-input').fill('11:00');
-    await page.getByTestId('appointment-type-select').selectOption({ label: 'consultation' });
-    await page.getByTestId('appointment-symptoms-textarea').fill('Valid length symptoms');
-
-    await page.getByTestId('create-appointment-submit').click();
+    const form = new CreateAppointmentPage(page);
+    await form.goto();
+    // Fill everything valid EXCEPT priority (omit it).
+    await form.fill({
+      department: 'Cardiology',
+      doctor: 'Dr. Sarah Chen',
+      patient: 'John Smith',
+      date: '2030-05-20',
+      time: '11:00',
+      type: 'consultation',
+      symptoms: 'Valid length symptoms',
+    });
+    await form.submit();
 
     await expect(page, 'native required validation should keep us on the form').toHaveURL(
       /\/appointments\/new$/,
     );
-    const after = await request.get(`${seeded.api}/appointments`);
-    expect((await after.json()).length, 'no appointment created').toBe(before);
+    expect(await db.count('appointments'), 'no appointment created').toBe(3);
   });
 });

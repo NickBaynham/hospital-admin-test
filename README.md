@@ -55,6 +55,23 @@ section 10 for the isolation constraint.
 - `tests/api/_helpers.ts` — request helpers (`getJson`) and valid-payload builders
   (`patientPayload`, `doctorPayload`, `appointmentPayload`) for overrides.
 
+### Page objects
+
+UI tests drive the app through page objects in `tests/pages/` (`DashboardPage`,
+`CreateAppointmentPage`, `PatientsPage`, `DoctorsPage`) — locators by `data-testid` and
+action methods, so selectors live in one place.
+
+### Database-layer assertions
+
+A worker-scoped `db` fixture (`tests/db.ts`, the `mongodb` driver) connects to MongoDB so
+tests can confirm values actually persisted with the right shape and relationships — e.g.
+an appointment stores `patient_id`/`doctor_id`/`department_id` as `ObjectId` references, a
+status change is written, a rejected record is not inserted. The fixture is lazy: only
+tests that use `db` open a connection.
+
+Set `MONGO_URL` (default `mongodb://localhost:27017`, per the app compose file) if your
+local Mongo container is mapped to a different host port (e.g. `mongodb://localhost:27018`).
+
 ## Continuous integration
 
 `.github/workflows/playwright.yml` checks out the application repo, starts its Docker

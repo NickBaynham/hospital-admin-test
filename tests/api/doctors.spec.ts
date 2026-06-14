@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures';
+import { idEquals } from '../db';
 import { API, getJson, doctorPayload } from './_helpers';
 
 /**
@@ -10,7 +11,7 @@ test.describe('Doctors API', () => {
     expect(seeded.doctors.every((d) => d.id && d.name && d.department_id)).toBeTruthy();
   });
 
-  test('REQ-010 creates a doctor and reads it back', async ({ request, seeded }) => {
+  test('REQ-010 creates a doctor and reads it back', async ({ request, seeded, db }) => {
     const body = doctorPayload(seeded.departments[0].id, { name: 'Dr. Ada Lovelace' });
     const created = await request.post(`${API}/doctors`, { data: body });
     expect(created.status(), 'valid doctor should be created').toBe(201);
@@ -19,6 +20,11 @@ test.describe('Doctors API', () => {
     const fetched = await getJson(request, `/doctors/${doctor.id}`);
     expect(fetched.name).toBe('Dr. Ada Lovelace');
     expect(fetched.department_id).toBe(seeded.departments[0].id);
+
+    // DB assertion: stored with department_id as an ObjectId reference.
+    const stored = await db.findById('doctors', doctor.id);
+    expect(stored!.name).toBe('Dr. Ada Lovelace');
+    expect(idEquals(stored!.department_id, seeded.departments[0].id), 'department_id ObjectId ref').toBeTruthy();
   });
 
   test('REQ-046 filters doctors by department', async ({ request, seeded }) => {

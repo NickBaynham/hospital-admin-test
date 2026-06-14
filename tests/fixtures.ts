@@ -1,5 +1,6 @@
 import { test as base, expect, type APIRequestContext } from '@playwright/test';
 import { API, getJson } from './api/_helpers';
+import { DbClient } from './db';
 
 /**
  * Shared test fixtures for the whole suite.
@@ -22,7 +23,17 @@ export interface Seeded {
   appointments: Entity[];
 }
 
-export const test = base.extend<{ resetDb: void; seeded: Seeded }>({
+export const test = base.extend<{ resetDb: void; seeded: Seeded }, { db: DbClient }>({
+  // Worker-scoped: one MongoDB connection per worker, for database-layer assertions.
+  db: [
+    async ({}, use) => {
+      const client = await DbClient.connect();
+      await use(client);
+      await client.close();
+    },
+    { scope: 'worker' },
+  ],
+
   resetDb: [
     async ({ request }, use) => {
       const res = await request.post(`${API}/test-data/reset`);

@@ -24,6 +24,7 @@
   "homepage": "https://github.com/NickBaynham/hospital-admin-test#readme",
   "devDependencies": {
     "@playwright/test": "^1.60.0",
-    "@types/node": "^25.9.3"
+    "@types/node": "^25.9.3",
+    "mongodb": "^7.3.0"
   }
 }
