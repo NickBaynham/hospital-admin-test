@@ -227,6 +227,19 @@ frontend with `data-testid` selectors. Every test resets to the seed first.
 | UI-VAL-02 | Doctor duplicate email error | Doctor form surfaces a server error in `error-message`; no doctor added | Existing email sarah.chen@example.com | Pass |
 | UI-VAL-03 | Symptoms too short | Appointment form shows client error "Symptoms must be at least 10 characters"; no create | Valid appointment + symptoms `short` | Pass |
 | UI-VAL-04 | Required-field guard | Submitting with a required field (priority) unset does not navigate or create (native HTML5 validation) | Valid appointment minus priority | Pass |
+| UI-APPT-LIST-01 | Appointment list renders | List shows the seeded appointment rows | Seed | Pass |
+| UI-APPT-LIST-02 | Filter list by status | Status filter shows only scheduled rows | Seed | Pass |
+| UI-APPT-LIST-03 | Filter list by department | Department filter shows only that department | Cardiology | Pass |
+| UI-APPT-LIST-04 | Mark completed (row action) | Mark Completed button sets status completed; persists in DB | Seeded scheduled appt | Pass |
+| UI-APPT-LIST-05 | Cancel (row action) | Cancel button sets status cancelled; persists in DB | Seeded scheduled appt | Pass |
+| UI-APPT-LIST-06 | Delete (row action) | Delete button removes the row and the document | Seeded appt | Pass |
+| UI-APPT-LIST-07 | Empty list state | With all appointments deleted, the list shows zero rows | Seed deleted via API | Pass |
+| UI-PAT-CRUD-01 | Create patient via form | Form create adds the row and stores the document | name Grace Hopper, Aetna | Pass |
+| UI-PAT-CRUD-02 | Edit patient inline | Edit button + submit persists the new name | Seed patient → Johnny Smith | Pass |
+| UI-PAT-CRUD-03 | Delete patient (no appts) | Delete button removes a patient with no appointments | Created temp patient | Pass |
+| UI-DOC-CRUD-01 | Create doctor via form | Form create (with availability) adds the row; department_id stored as ObjectId | Dr. Ada Lovelace, Cardiology | Pass |
+| UI-DOC-CRUD-02 | Edit doctor inline | Edit button + submit persists the new name | Seed doctor → Chen-Reed | Pass |
+| UI-NAV-01..05 | Navigation smoke | Each nav link reaches its page (Patients/Doctors/Appointments/Create/Dashboard) | — | Pass |
 
 ### 8.4 Regression tests (known defects)
 

@@ -29,6 +29,14 @@ export class DoctorsPage {
     return this.table().locator('tbody tr');
   }
 
+  editButton(doctorId: string): Locator {
+    return this.page.getByTestId(`edit-doctor-${doctorId}`);
+  }
+
+  deleteButton(doctorId: string): Locator {
+    return this.page.getByTestId(`delete-doctor-${doctorId}`);
+  }
+
   async goto(): Promise<void> {
     await this.page.goto('/doctors');
   }

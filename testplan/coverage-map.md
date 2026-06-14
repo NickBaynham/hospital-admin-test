@@ -57,7 +57,7 @@ Status legend:
 | REQ-030 | Reject inactive patient booking | N/A | Patients have no `active` field (deviation); concept not implemented |
 | REQ-031 | Status enum, default scheduled | Automated | appointments: rejects invalid status transition value; creates valid asserts status=scheduled |
 | REQ-032 | Visit type enum | Automated | appointments: rejects invalid appointment_type / priority value |
-| REQ-033 | Status transitions | Partial | appointments: transitions to cancelled (Checked In/No Show absent — BUG-05) |
+| REQ-033 | Status transitions | Partial | appointments: cancel + Mark Completed via UI list (`appointments-list.spec.ts`); Checked In/No Show absent — BUG-05 |
 | REQ-034 | Cancel appointment | Automated | appointments: transitions to cancelled; ui: cancellation reflection |
 | REQ-035 | Appointment list filters | Automated | appointments: filters by status/department/doctor (date filter — REQ-048 — absent) |
 | REQ-036 | Reject double-booking | Automated (red) | regression BUG-03 |
@@ -66,7 +66,7 @@ Status legend:
 | REQ-039 | Recent patients | Uncovered | Dashboard does not show recent patients (deviation) |
 | REQ-040 | Dashboard updates on change | Automated | ui: reflects a cancellation; ui: creates an appointment |
 | REQ-041 | Cancelled not counted upcoming | Automated | ui: reflects a cancellation |
-| REQ-042 | Dashboard empty state | Uncovered | Gap — needs an empty-DB scenario |
+| REQ-042 | Empty state | Automated | ui: appointments list shows an empty list when there are no appointments (`appointments-list.spec.ts`) |
 | REQ-043 | GET /health | Uncovered | Used by CI wait; no dedicated assertion |
 | REQ-044 | Reset/seed endpoints | Implicit | Every test calls `POST /test-data/reset` |
 | REQ-045 | CRUD endpoints | Partial | patients/doctors/appointments CRUD covered; departments GET/POST covered (no id-level CRUD exposed) |
@@ -92,8 +92,8 @@ Status legend:
 
 ## Run-grounded reconciliation
 
-The `tc-test-plan` skill, fed the latest Playwright `results.json`, reports **25 automated
-(passing), 8 automated-failing, 21 planned, 0 uncovered** across the 54 requirements. That
+The `tc-test-plan` skill, fed the latest Playwright `results.json`, reports **27 automated
+(passing), 8 automated-failing, 19 planned, 0 uncovered** across the 54 requirements. That
 differs from the curated counts above, and the differences are expected, not errors:
 
 - The skill counts any requirement with a linked **passing** test as `automated` — so it
@@ -117,7 +117,14 @@ or (b) reclassifying the row here. The skill is the prompt; this map is the deci
    `active` field).
 3. ~~Departments endpoints~~ — **addressed** for the exposed surface (REQ-007 + BUG-08);
    id-level CRUD is not implemented by the app.
-4. **DB-layer assertions** — REQ-050/051 (direct MongoDB checks); no test touches Mongo yet.
-5. **Dashboard empty state** — REQ-042 (needs an empty-DB scenario).
+4. ~~UI interactive surface~~ — **addressed**: appointments list table/filters/row actions
+   (`appointments-list.spec.ts`), patient + doctor create/edit/delete via the UI
+   (`patients-crud.spec.ts`, `doctors-crud.spec.ts`), navigation smoke
+   (`navigation.spec.ts`), and the empty state (REQ-042).
+5. ~~DB-layer assertions~~ — **addressed**: a `db` fixture asserts persistence and
+   relationship references (REQ-051 automated; REQ-050 partial — users/departments
+   collections not yet asserted).
 6. **Remaining unimplemented-filter gaps** — REQ-048 (appointment date filter),
    REQ-015 (doctor name/specialty search): decide whether to log as defects.
+7. **Doctor active-toggle / availability UI** (REQ-014 UI), and Checked In / No Show
+   statuses (REQ-031/033, blocked — the app implements only three statuses, BUG-05).

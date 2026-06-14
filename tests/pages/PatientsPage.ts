@@ -30,6 +30,14 @@ export class PatientsPage {
     return this.table().locator('tbody tr');
   }
 
+  editButton(patientId: string): Locator {
+    return this.page.getByTestId(`edit-patient-${patientId}`);
+  }
+
+  deleteButton(patientId: string): Locator {
+    return this.page.getByTestId(`delete-patient-${patientId}`);
+  }
+
   async goto(): Promise<void> {
     await this.page.goto('/patients');
   }
