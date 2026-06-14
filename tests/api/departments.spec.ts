@@ -15,13 +15,13 @@ test.describe('Departments API', () => {
     await reset(request);
   });
 
-  test('lists the seeded departments', async ({ request }) => {
+  test('REQ-050 lists the seeded departments', async ({ request }) => {
     const departments = await getJson(request, '/departments');
     expect(departments.length).toBeGreaterThanOrEqual(4);
     expect(departments.every((d: any) => d.id && d.name)).toBeTruthy();
   });
 
-  test('creates a department with a unique name', async ({ request }) => {
+  test('REQ-007 creates a department with a unique name', async ({ request }) => {
     const before = (await getJson(request, '/departments')).length;
     const res = await request.post(`${API}/departments`, { data: { name: 'Oncology' } });
     expect(res.status(), 'a department with a unique name should be created').toBe(201);

@@ -14,13 +14,13 @@ test.describe('Patients API', () => {
     await reset(request);
   });
 
-  test('lists the seeded patients', async ({ request }) => {
+  test('REQ-023 lists the seeded patients', async ({ request }) => {
     const patients = await getJson(request, '/patients');
     expect(patients.length).toBeGreaterThanOrEqual(3);
     expect(patients.every((p: any) => typeof p.id === 'string' && p.name)).toBeTruthy();
   });
 
-  test('creates a patient and reads it back', async ({ request }) => {
+  test('REQ-016 creates a patient and reads it back', async ({ request }) => {
     const body = patientPayload({ name: 'Grace Hopper' });
     const created = await request.post(`${API}/patients`, { data: body });
     expect(created.status(), 'valid patient should be created').toBe(201);
@@ -35,7 +35,7 @@ test.describe('Patients API', () => {
     expect(list.some((p: any) => p.id === patient.id)).toBeTruthy();
   });
 
-  test('updates a patient', async ({ request }) => {
+  test('REQ-024 updates a patient', async ({ request }) => {
     const created = await (await request.post(`${API}/patients`, { data: patientPayload() })).json();
     const update = await request.put(`${API}/patients/${created.id}`, {
       data: patientPayload({ name: 'Updated Name', email: created.email }),
@@ -45,7 +45,7 @@ test.describe('Patients API', () => {
     expect(fetched.name).toBe('Updated Name');
   });
 
-  test('deletes a patient that has no appointments', async ({ request }) => {
+  test('REQ-045 deletes a patient that has no appointments', async ({ request }) => {
     const created = await (await request.post(`${API}/patients`, { data: patientPayload() })).json();
     const del = await request.delete(`${API}/patients/${created.id}`);
     expect(del.ok(), 'a patient with no appointments should be deletable').toBeTruthy();
@@ -53,7 +53,7 @@ test.describe('Patients API', () => {
     expect(list.some((p: any) => p.id === created.id)).toBeFalsy();
   });
 
-  test('preserves referential integrity: cannot delete a patient with appointments', async ({ request }) => {
+  test('REQ-054 preserves referential integrity: cannot delete a patient with appointments', async ({ request }) => {
     const appointments = await getJson(request, '/appointments');
     expect(appointments.length).toBeGreaterThan(0);
     const patientWithAppt = appointments[0].patient_id;
@@ -65,7 +65,7 @@ test.describe('Patients API', () => {
   });
 
   test.describe('validation (negative)', () => {
-    test('rejects a duplicate email', async ({ request }) => {
+    test('REQ-019 rejects a duplicate email', async ({ request }) => {
       const existing = (await getJson(request, '/patients'))[0];
       const res = await request.post(`${API}/patients`, {
         data: patientPayload({ email: existing.email }),
@@ -73,7 +73,7 @@ test.describe('Patients API', () => {
       expect(res.status(), 'duplicate email should be rejected').toBeGreaterThanOrEqual(400);
     });
 
-    test('rejects an invalid email format', async ({ request }) => {
+    test('REQ-017 rejects an invalid email format', async ({ request }) => {
       const res = await request.post(`${API}/patients`, {
         data: patientPayload({ email: 'not-an-email' }),
       });

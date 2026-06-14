@@ -16,7 +16,7 @@ test.describe('Form validation (UI)', () => {
     await reset(request);
   });
 
-  test('patient form surfaces a server error for a duplicate email', async ({ page, request }) => {
+  test('REQ-019 patient form surfaces a server error for a duplicate email', async ({ page, request }) => {
     const before = (await getJson(request, '/patients')).length;
     await page.goto('/patients');
 
@@ -33,7 +33,7 @@ test.describe('Form validation (UI)', () => {
     expect((await getJson(request, '/patients')).length, 'no patient should be added').toBe(before);
   });
 
-  test('doctor form surfaces a server error for a duplicate email', async ({ page, request }) => {
+  test('REQ-013 doctor form surfaces a server error for a duplicate email', async ({ page, request }) => {
     const before = (await getJson(request, '/doctors')).length;
     await page.goto('/doctors');
 
@@ -49,7 +49,7 @@ test.describe('Form validation (UI)', () => {
     expect((await getJson(request, '/doctors')).length, 'no doctor should be added').toBe(before);
   });
 
-  test('appointment form shows a client-side error for too-short symptoms', async ({ page, request }) => {
+  test('REQ-049 appointment form shows a client-side error for too-short symptoms', async ({ page, request }) => {
     const before = (await getJson(request, '/appointments')).length;
     await page.goto('/appointments/new');
 
@@ -72,7 +72,7 @@ test.describe('Form validation (UI)', () => {
   // BUG-04 follow-up: an incomplete form (a required field left unset) does not submit.
   // The form relies on native HTML5 `required` validation — it correctly blocks submission
   // (no navigation, nothing created), though it shows no in-app error-message (native bubble only).
-  test('appointment form blocks submission when a required field is unset', async ({ page, request }) => {
+  test('REQ-049 appointment form blocks submission when a required field is unset', async ({ page, request }) => {
     const before = (await getJson(request, '/appointments')).length;
     await page.goto('/appointments/new');
 

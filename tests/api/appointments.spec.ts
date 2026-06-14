@@ -15,7 +15,7 @@ test.describe('Appointments API', () => {
     await reset(request);
   });
 
-  test('creates a valid future appointment and reads it back', async ({ request }) => {
+  test('REQ-025 creates a valid future appointment and reads it back', async ({ request }) => {
     const [patients, doctors] = await Promise.all([
       getJson(request, '/patients'),
       getJson(request, '/doctors'),
@@ -31,7 +31,7 @@ test.describe('Appointments API', () => {
     expect(fetched.status).toBe('scheduled');
   });
 
-  test('rejects a doctor outside the selected department (relationship rule)', async ({ request }) => {
+  test('REQ-026 rejects a doctor outside the selected department (relationship rule)', async ({ request }) => {
     const [patients, doctors, departments] = await Promise.all([
       getJson(request, '/patients'),
       getJson(request, '/doctors'),
@@ -48,13 +48,13 @@ test.describe('Appointments API', () => {
     ).toBeGreaterThanOrEqual(400);
   });
 
-  test('filters appointments by status', async ({ request }) => {
+  test('REQ-035 filters appointments by status', async ({ request }) => {
     const filtered = await getJson(request, '/appointments?status=scheduled');
     expect(filtered.length).toBeGreaterThan(0);
     expect(filtered.every((a: any) => a.status === 'scheduled')).toBeTruthy();
   });
 
-  test('filters appointments by department', async ({ request }) => {
+  test('REQ-035 filters appointments by department', async ({ request }) => {
     const all = await getJson(request, '/appointments');
     const deptId = all[0].department_id;
     const filtered = await getJson(request, `/appointments?department_id=${deptId}`);
@@ -62,7 +62,7 @@ test.describe('Appointments API', () => {
     expect(filtered.every((a: any) => a.department_id === deptId)).toBeTruthy();
   });
 
-  test('filters appointments by doctor', async ({ request }) => {
+  test('REQ-035 filters appointments by doctor', async ({ request }) => {
     const all = await getJson(request, '/appointments');
     const doctorId = all[0].doctor_id;
     const filtered = await getJson(request, `/appointments?doctor_id=${doctorId}`);
@@ -70,7 +70,7 @@ test.describe('Appointments API', () => {
     expect(filtered.every((a: any) => a.doctor_id === doctorId)).toBeTruthy();
   });
 
-  test('transitions an appointment status to cancelled', async ({ request }) => {
+  test('REQ-034 transitions an appointment status to cancelled', async ({ request }) => {
     const scheduled = (await getJson(request, '/appointments?status=scheduled'))[0];
     const patch = await request.patch(`${API}/appointments/${scheduled.id}/status`, {
       data: { status: 'cancelled' },
@@ -85,7 +85,7 @@ test.describe('Appointments API', () => {
     ['appointment_type', 'bogus-type'],
     ['priority', 'bogus-priority'],
   ] as const) {
-    test(`rejects an invalid ${field} value`, async ({ request }) => {
+    test(`REQ-031 REQ-032 rejects an invalid ${field} value`, async ({ request }) => {
       const [patients, doctors] = await Promise.all([
         getJson(request, '/patients'),
         getJson(request, '/doctors'),
@@ -100,7 +100,7 @@ test.describe('Appointments API', () => {
     });
   }
 
-  test('rejects an invalid status transition value', async ({ request }) => {
+  test('REQ-031 rejects an invalid status transition value', async ({ request }) => {
     const scheduled = (await getJson(request, '/appointments?status=scheduled'))[0];
     const patch = await request.patch(`${API}/appointments/${scheduled.id}/status`, {
       data: { status: 'teleported' },

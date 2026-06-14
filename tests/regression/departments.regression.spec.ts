@@ -15,7 +15,7 @@ test.describe('Department uniqueness regression (known defect)', () => {
     await reset(request);
   });
 
-  test('BUG-08: a duplicate department name is rejected', async ({ request }) => {
+  test('BUG-08 REQ-008: a duplicate department name is rejected', async ({ request }) => {
     const existing = (await getJson(request, '/departments'))[0];
     const res = await request.post(`${API}/departments`, { data: { name: existing.name } });
     expect(

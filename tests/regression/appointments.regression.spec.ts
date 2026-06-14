@@ -36,7 +36,7 @@ test.describe('Appointment scheduling regressions (known defects)', () => {
   });
 
   // BUG-01 / REQ-028: an appointment date in the past must be rejected.
-  test('BUG-01: a past appointment date is rejected', async ({ request }) => {
+  test('BUG-01 REQ-028: a past appointment date is rejected', async ({ request }) => {
     const [patients, doctors] = await Promise.all([
       getJson(request, '/patients'),
       getJson(request, '/doctors'),
@@ -61,7 +61,7 @@ test.describe('Appointment scheduling regressions (known defects)', () => {
   });
 
   // BUG-02 / REQ-029: an inactive doctor must not be bookable.
-  test('BUG-02: an inactive doctor cannot be booked', async ({ request }) => {
+  test('BUG-02 REQ-029: an inactive doctor cannot be booked', async ({ request }) => {
     const [patients, doctors] = await Promise.all([
       getJson(request, '/patients'),
       getJson(request, '/doctors'),
@@ -99,7 +99,7 @@ test.describe('Appointment scheduling regressions (known defects)', () => {
   });
 
   // BUG-03 / REQ-036: the same doctor must not be double-booked at the same date and time.
-  test('BUG-03: the same doctor cannot be double-booked at the same slot', async ({ request }) => {
+  test('BUG-03 REQ-036: the same doctor cannot be double-booked at the same slot', async ({ request }) => {
     const [appointments, patients] = await Promise.all([
       getJson(request, '/appointments'),
       getJson(request, '/patients'),

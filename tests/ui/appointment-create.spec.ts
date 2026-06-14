@@ -15,7 +15,7 @@ test.describe('Create Appointment page', () => {
     await reset(request);
   });
 
-  test('the doctor dropdown is filtered by the selected department', async ({ page }) => {
+  test('REQ-027 the doctor dropdown is filtered by the selected department', async ({ page }) => {
     await page.goto('/appointments/new');
     const doctor = page.getByTestId('appointment-doctor-select');
 
@@ -31,7 +31,7 @@ test.describe('Create Appointment page', () => {
     await expect(doctor.locator('option')).toContainText(['Select...', 'Dr. James Patel']);
   });
 
-  test('creates an appointment and shows it in the list', async ({ page }) => {
+  test('REQ-025 creates an appointment and shows it in the list', async ({ page }) => {
     await page.goto('/appointments/new');
 
     await page.getByTestId('appointment-department-select').selectOption({ label: 'Pediatrics' });

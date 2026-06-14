@@ -14,13 +14,13 @@ test.describe('Doctors API', () => {
     await reset(request);
   });
 
-  test('lists the seeded doctors', async ({ request }) => {
+  test('REQ-015 lists the seeded doctors', async ({ request }) => {
     const doctors = await getJson(request, '/doctors');
     expect(doctors.length).toBeGreaterThanOrEqual(4);
     expect(doctors.every((d: any) => d.id && d.name && d.department_id)).toBeTruthy();
   });
 
-  test('creates a doctor and reads it back', async ({ request }) => {
+  test('REQ-010 creates a doctor and reads it back', async ({ request }) => {
     const departments = await getJson(request, '/departments');
     const body = doctorPayload(departments[0].id, { name: 'Dr. Ada Lovelace' });
     const created = await request.post(`${API}/doctors`, { data: body });
@@ -32,7 +32,7 @@ test.describe('Doctors API', () => {
     expect(fetched.department_id).toBe(departments[0].id);
   });
 
-  test('filters doctors by department', async ({ request }) => {
+  test('REQ-046 filters doctors by department', async ({ request }) => {
     const departments = await getJson(request, '/departments');
     const deptId = departments[0].id;
     const filtered = await getJson(request, `/doctors?department_id=${deptId}`);
@@ -40,7 +40,7 @@ test.describe('Doctors API', () => {
     expect(filtered.every((d: any) => d.department_id === deptId)).toBeTruthy();
   });
 
-  test('rejects a doctor with a nonexistent department', async ({ request }) => {
+  test('REQ-012 rejects a doctor with a nonexistent department', async ({ request }) => {
     const res = await request.post(`${API}/doctors`, {
       data: doctorPayload('000000000000000000000000'),
     });
@@ -50,7 +50,7 @@ test.describe('Doctors API', () => {
     ).toBeGreaterThanOrEqual(400);
   });
 
-  test('rejects a doctor with a duplicate email', async ({ request }) => {
+  test('REQ-013 rejects a doctor with a duplicate email', async ({ request }) => {
     const [departments, doctors] = await Promise.all([
       getJson(request, '/departments'),
       getJson(request, '/doctors'),
@@ -61,7 +61,7 @@ test.describe('Doctors API', () => {
     expect(res.status(), 'duplicate doctor email must be rejected').toBeGreaterThanOrEqual(400);
   });
 
-  test('deletes a doctor that has no appointments', async ({ request }) => {
+  test('REQ-045 deletes a doctor that has no appointments', async ({ request }) => {
     const departments = await getJson(request, '/departments');
     const created = await (
       await request.post(`${API}/doctors`, { data: doctorPayload(departments[0].id) })
@@ -72,7 +72,7 @@ test.describe('Doctors API', () => {
     expect(list.some((d: any) => d.id === created.id)).toBeFalsy();
   });
 
-  test('preserves referential integrity: cannot delete a doctor with appointments', async ({ request }) => {
+  test('REQ-054 preserves referential integrity: cannot delete a doctor with appointments', async ({ request }) => {
     const appointments = await getJson(request, '/appointments');
     expect(appointments.length).toBeGreaterThan(0);
     const doctorWithAppt = appointments[0].doctor_id;

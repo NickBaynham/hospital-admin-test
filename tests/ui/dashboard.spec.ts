@@ -14,7 +14,7 @@ test.describe('Dashboard page', () => {
     await reset(request);
   });
 
-  test('shows the seeded summary counts', async ({ page }) => {
+  test('REQ-037 shows the seeded summary counts', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('dashboard-page')).toBeVisible();
 
@@ -25,7 +25,7 @@ test.describe('Dashboard page', () => {
     await expect(page.getByTestId('count-scheduled')).toHaveText('2');
   });
 
-  test('lists upcoming appointments', async ({ page }) => {
+  test('REQ-038 lists upcoming appointments', async ({ page }) => {
     await page.goto('/');
     const rows = page.getByTestId('upcoming-appointments').locator('tbody tr');
     await expect(rows).toHaveCount(2);
@@ -33,7 +33,7 @@ test.describe('Dashboard page', () => {
     await expect(page.getByTestId('upcoming-appointments')).toContainText('Maria Garcia');
   });
 
-  test('reflects a cancellation: count drops and row leaves upcoming', async ({ page, request }) => {
+  test('REQ-040 REQ-041 reflects a cancellation: count drops and row leaves upcoming', async ({ page, request }) => {
     // Cancel the first scheduled appointment via the API, then assert the dashboard updates.
     const appts = await (await request.get('http://localhost:8000/appointments?status=scheduled')).json();
     const target = appts[0];

@@ -17,7 +17,7 @@ test.describe('Patient search regression (known defect)', () => {
     await reset(request);
   });
 
-  test('BUG-06: searching patients by name returns only matches', async ({ request }) => {
+  test('BUG-06 REQ-047: searching patients by name returns only matches', async ({ request }) => {
     const marker = `Zylander${Date.now()}`;
     const created = await request.post(`${API}/patients`, {
       data: patientPayload({ name: `${marker} Smith` }),
@@ -33,7 +33,7 @@ test.describe('Patient search regression (known defect)', () => {
   });
 
   // BUG-07 / REQ-018: a future date of birth must be rejected. The app accepts it.
-  test('BUG-07: a future date of birth is rejected', async ({ request }) => {
+  test('BUG-07 REQ-018: a future date of birth is rejected', async ({ request }) => {
     const res = await request.post(`${API}/patients`, {
       data: patientPayload({ date_of_birth: '2999-01-01' }),
     });
@@ -44,7 +44,7 @@ test.describe('Patient search regression (known defect)', () => {
   });
 
   // BUG-09 / REQ-020: an invalid phone format must be rejected. The app accepts any string.
-  test('BUG-09: an invalid phone format is rejected', async ({ request }) => {
+  test('BUG-09 REQ-020: an invalid phone format is rejected', async ({ request }) => {
     const res = await request.post(`${API}/patients`, {
       data: patientPayload({ phone: '!!!not-a-phone!!!' }),
     });
