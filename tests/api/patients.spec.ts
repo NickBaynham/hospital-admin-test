@@ -1,23 +1,16 @@
-import { test, expect } from '@playwright/test';
-import { API, reset, getJson, patientPayload } from './_helpers';
+import { test, expect } from '../fixtures';
+import { API, getJson, patientPayload } from './_helpers';
+import { patientValidationCases } from '../data/validation-cases';
 
 /**
- * Patients coverage (functional). These assert the implemented behavior and should PASS.
- * Sequential, single global DB — run via `npm run test:api`.
+ * Patients coverage (functional). Auto-reset + seed data via fixtures.
+ * Validation cases are data-driven from tests/data/validation-cases.ts.
+ * Run via `npm run test:api`.
  */
 test.describe('Patients API', () => {
-  test.beforeEach(async ({ request }) => {
-    await reset(request);
-  });
-
-  test.afterAll(async ({ request }) => {
-    await reset(request);
-  });
-
-  test('REQ-023 lists the seeded patients', async ({ request }) => {
-    const patients = await getJson(request, '/patients');
-    expect(patients.length).toBeGreaterThanOrEqual(3);
-    expect(patients.every((p: any) => typeof p.id === 'string' && p.name)).toBeTruthy();
+  test('REQ-023 lists the seeded patients', async ({ seeded }) => {
+    expect(seeded.patients.length).toBeGreaterThanOrEqual(3);
+    expect(seeded.patients.every((p) => typeof p.id === 'string' && p.name)).toBeTruthy();
   });
 
   test('REQ-016 creates a patient and reads it back', async ({ request }) => {
@@ -53,10 +46,11 @@ test.describe('Patients API', () => {
     expect(list.some((p: any) => p.id === created.id)).toBeFalsy();
   });
 
-  test('REQ-054 preserves referential integrity: cannot delete a patient with appointments', async ({ request }) => {
-    const appointments = await getJson(request, '/appointments');
-    expect(appointments.length).toBeGreaterThan(0);
-    const patientWithAppt = appointments[0].patient_id;
+  test('REQ-054 preserves referential integrity: cannot delete a patient with appointments', async ({
+    request,
+    seeded,
+  }) => {
+    const patientWithAppt = seeded.appointments[0].patient_id;
     const del = await request.delete(`${API}/patients/${patientWithAppt}`);
     expect(
       del.status(),
@@ -64,23 +58,18 @@ test.describe('Patients API', () => {
     ).toBeGreaterThanOrEqual(400);
   });
 
-  test.describe('validation (negative)', () => {
-    test('REQ-019 rejects a duplicate email', async ({ request }) => {
-      const existing = (await getJson(request, '/patients'))[0];
-      const res = await request.post(`${API}/patients`, {
-        data: patientPayload({ email: existing.email }),
+  test.describe('validation (negative, data-driven)', () => {
+    for (const tc of patientValidationCases) {
+      test(`${tc.req} patient create rejects/accepts: ${tc.name}`, async ({ request, seeded }) => {
+        const patch = { ...tc.patch };
+        if (patch.email === '__dupEmail') patch.email = seeded.patients[0].email;
+        const res = await request.post(`${API}/patients`, { data: patientPayload(patch) });
+        if (tc.expectReject) {
+          expect(res.status(), `${tc.name} should be rejected`).toBeGreaterThanOrEqual(400);
+        } else {
+          expect(res.status(), `${tc.name} should be accepted`).toBe(201);
+        }
       });
-      expect(res.status(), 'duplicate email should be rejected').toBeGreaterThanOrEqual(400);
-    });
-
-    test('REQ-017 rejects an invalid email format', async ({ request }) => {
-      const res = await request.post(`${API}/patients`, {
-        data: patientPayload({ email: 'not-an-email' }),
-      });
-      expect(res.status()).toBeGreaterThanOrEqual(400);
-    });
-
-    // Note: future-date-of-birth rejection is a KNOWN DEFECT (the app accepts it).
-    // It is covered as a red regression test in tests/regression/patients.regression.spec.ts (BUG-07).
+    }
   });
 });

@@ -1,40 +1,12 @@
-import { test, expect, type APIRequestContext } from '@playwright/test';
+import { test, expect } from '../fixtures';
+import { API, getJson } from '../api/_helpers';
 
 /**
  * Regression tests for known appointment-scheduling defects (CH-001 exploration).
- *
- * Each test asserts the CORRECT, documented behavior, so it currently FAILS (red)
- * against the buggy app and turns GREEN once the defect is fixed. See
- * testplan/testplan.md section 9 (BUG-01..03).
- *
- * API-only: uses the `request` fixture, no browser. Run with `--project=api`.
+ * Each test asserts the CORRECT behavior, so it currently FAILS (red) until the
+ * defect is fixed. Auto-reset via fixtures. Run with `npm run test:regression`.
  */
-
-const API = process.env.API_BASE_URL ?? 'http://localhost:8000';
-
-async function reset(request: APIRequestContext): Promise<void> {
-  const res = await request.post(`${API}/test-data/reset`);
-  expect(res.ok(), 'reset seed should succeed').toBeTruthy();
-}
-
-async function getJson<T = any>(request: APIRequestContext, path: string): Promise<T> {
-  const res = await request.get(`${API}${path}`);
-  expect(res.ok(), `GET ${path} should succeed`).toBeTruthy();
-  return res.json();
-}
-
-// These tests share one global database via POST /test-data/reset, which regenerates
-// all document IDs. They must run sequentially (the `api` project sets
-// fullyParallel: false), or one test's reset invalidates another's fetched IDs mid-run.
 test.describe('Appointment scheduling regressions (known defects)', () => {
-  test.beforeEach(async ({ request }) => {
-    await reset(request);
-  });
-
-  test.afterAll(async ({ request }) => {
-    await reset(request);
-  });
-
   // BUG-01 / REQ-028: an appointment date in the past must be rejected.
   test('BUG-01 REQ-028: a past appointment date is rejected', async ({ request }) => {
     const [patients, doctors] = await Promise.all([

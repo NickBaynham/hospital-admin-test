@@ -1,28 +1,16 @@
-import { test, expect } from '@playwright/test';
-import { API, reset, getJson, appointmentPayload } from './_helpers';
+import { test, expect } from '../fixtures';
+import { API, getJson, appointmentPayload } from './_helpers';
+import { appointmentEnumCases } from '../data/validation-cases';
 
 /**
- * Appointment scheduling happy paths, relationship rule, filters, and status
- * transitions (functional). These assert implemented behavior and should PASS.
- * Sequential, single global DB — run via `npm run test:api`.
+ * Appointment scheduling: happy path, relationship rule, filters, status
+ * transitions, and enum validation. Auto-reset + seed data via fixtures.
  */
 test.describe('Appointments API', () => {
-  test.beforeEach(async ({ request }) => {
-    await reset(request);
-  });
-
-  test.afterAll(async ({ request }) => {
-    await reset(request);
-  });
-
-  test('REQ-025 creates a valid future appointment and reads it back', async ({ request }) => {
-    const [patients, doctors] = await Promise.all([
-      getJson(request, '/patients'),
-      getJson(request, '/doctors'),
-    ]);
-    const doctor = doctors[0];
+  test('REQ-025 creates a valid future appointment and reads it back', async ({ request, seeded }) => {
+    const doctor = seeded.doctors[0];
     const res = await request.post(`${API}/appointments`, {
-      data: appointmentPayload(patients[0].id, doctor.id, doctor.department_id),
+      data: appointmentPayload(seeded.patients[0].id, doctor.id, doctor.department_id),
     });
     expect(res.status(), 'valid appointment should be created').toBe(201);
     const appt = await res.json();
@@ -31,21 +19,16 @@ test.describe('Appointments API', () => {
     expect(fetched.status).toBe('scheduled');
   });
 
-  test('REQ-026 rejects a doctor outside the selected department (relationship rule)', async ({ request }) => {
-    const [patients, doctors, departments] = await Promise.all([
-      getJson(request, '/patients'),
-      getJson(request, '/doctors'),
-      getJson(request, '/departments'),
-    ]);
-    const doctor = doctors[0];
-    const otherDept = departments.find((d: any) => d.id !== doctor.department_id);
+  test('REQ-026 rejects a doctor outside the selected department (relationship rule)', async ({
+    request,
+    seeded,
+  }) => {
+    const doctor = seeded.doctors[0];
+    const otherDept = seeded.departments.find((d) => d.id !== doctor.department_id)!;
     const res = await request.post(`${API}/appointments`, {
-      data: appointmentPayload(patients[0].id, doctor.id, otherDept.id),
+      data: appointmentPayload(seeded.patients[0].id, doctor.id, otherDept.id),
     });
-    expect(
-      res.status(),
-      'doctor not in the selected department must be rejected',
-    ).toBeGreaterThanOrEqual(400);
+    expect(res.status(), 'doctor not in the selected department must be rejected').toBeGreaterThanOrEqual(400);
   });
 
   test('REQ-035 filters appointments by status', async ({ request }) => {
@@ -54,24 +37,22 @@ test.describe('Appointments API', () => {
     expect(filtered.every((a: any) => a.status === 'scheduled')).toBeTruthy();
   });
 
-  test('REQ-035 filters appointments by department', async ({ request }) => {
-    const all = await getJson(request, '/appointments');
-    const deptId = all[0].department_id;
+  test('REQ-035 filters appointments by department', async ({ request, seeded }) => {
+    const deptId = seeded.appointments[0].department_id;
     const filtered = await getJson(request, `/appointments?department_id=${deptId}`);
     expect(filtered.length).toBeGreaterThan(0);
     expect(filtered.every((a: any) => a.department_id === deptId)).toBeTruthy();
   });
 
-  test('REQ-035 filters appointments by doctor', async ({ request }) => {
-    const all = await getJson(request, '/appointments');
-    const doctorId = all[0].doctor_id;
+  test('REQ-035 filters appointments by doctor', async ({ request, seeded }) => {
+    const doctorId = seeded.appointments[0].doctor_id;
     const filtered = await getJson(request, `/appointments?doctor_id=${doctorId}`);
     expect(filtered.length).toBeGreaterThan(0);
     expect(filtered.every((a: any) => a.doctor_id === doctorId)).toBeTruthy();
   });
 
-  test('REQ-034 transitions an appointment status to cancelled', async ({ request }) => {
-    const scheduled = (await getJson(request, '/appointments?status=scheduled'))[0];
+  test('REQ-034 transitions an appointment status to cancelled', async ({ request, seeded }) => {
+    const scheduled = seeded.appointments.find((a) => a.status === 'scheduled')!;
     const patch = await request.patch(`${API}/appointments/${scheduled.id}/status`, {
       data: { status: 'cancelled' },
     });
@@ -80,19 +61,12 @@ test.describe('Appointments API', () => {
     expect(fetched.status).toBe('cancelled');
   });
 
-  // REQ-031 / REQ-032: appointment_type, priority, and status are constrained enums.
-  for (const [field, badValue] of [
-    ['appointment_type', 'bogus-type'],
-    ['priority', 'bogus-priority'],
-  ] as const) {
-    test(`REQ-031 REQ-032 rejects an invalid ${field} value`, async ({ request }) => {
-      const [patients, doctors] = await Promise.all([
-        getJson(request, '/patients'),
-        getJson(request, '/doctors'),
-      ]);
-      const doctor = doctors[0];
+  // REQ-031 / REQ-032: appointment_type and priority are constrained enums (data-driven).
+  for (const { field, badValue } of appointmentEnumCases) {
+    test(`REQ-031 REQ-032 rejects an invalid ${field} value`, async ({ request, seeded }) => {
+      const doctor = seeded.doctors[0];
       const res = await request.post(`${API}/appointments`, {
-        data: appointmentPayload(patients[0].id, doctor.id, doctor.department_id, {
+        data: appointmentPayload(seeded.patients[0].id, doctor.id, doctor.department_id, {
           [field]: badValue,
         }),
       });
@@ -100,8 +74,8 @@ test.describe('Appointments API', () => {
     });
   }
 
-  test('REQ-031 rejects an invalid status transition value', async ({ request }) => {
-    const scheduled = (await getJson(request, '/appointments?status=scheduled'))[0];
+  test('REQ-031 rejects an invalid status transition value', async ({ request, seeded }) => {
+    const scheduled = seeded.appointments.find((a) => a.status === 'scheduled')!;
     const patch = await request.patch(`${API}/appointments/${scheduled.id}/status`, {
       data: { status: 'teleported' },
     });

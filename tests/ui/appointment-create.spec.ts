@@ -1,20 +1,10 @@
-import { test, expect } from '@playwright/test';
-import { reset } from '../api/_helpers';
+import { test, expect } from '../fixtures';
 
 /**
  * Create Appointment UI happy path: the department -> doctor dependency, form fill,
- * submit, and the new row appearing in the appointments list.
- * Sequential, single global DB — run via `npm run test:ui`.
+ * submit, and the new row appearing in the appointments list. Auto-reset via fixtures.
  */
 test.describe('Create Appointment page', () => {
-  test.beforeEach(async ({ request }) => {
-    await reset(request);
-  });
-
-  test.afterAll(async ({ request }) => {
-    await reset(request);
-  });
-
   test('REQ-027 the doctor dropdown is filtered by the selected department', async ({ page }) => {
     await page.goto('/appointments/new');
     const doctor = page.getByTestId('appointment-doctor-select');

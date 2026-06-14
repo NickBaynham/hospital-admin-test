@@ -1,22 +1,11 @@
-import { test, expect } from '@playwright/test';
-import { API, reset, getJson, patientPayload } from '../api/_helpers';
+import { test, expect } from '../fixtures';
+import { API, getJson, patientPayload } from '../api/_helpers';
 
 /**
- * BUG-06 / REQ-047: patient search is not implemented. GET /patients ignores the
- * `search` query parameter and returns every patient. This test asserts the correct
- * behavior, so it currently FAILS (red) until search is implemented.
- *
- * Sequential, single global DB — run via `npm run test:regression`.
+ * Patient known defects. Each asserts the correct behavior, so it FAILS (red) until
+ * fixed. Auto-reset via fixtures. Run via `npm run test:regression`.
  */
 test.describe('Patient search regression (known defect)', () => {
-  test.beforeEach(async ({ request }) => {
-    await reset(request);
-  });
-
-  test.afterAll(async ({ request }) => {
-    await reset(request);
-  });
-
   test('BUG-06 REQ-047: searching patients by name returns only matches', async ({ request }) => {
     const marker = `Zylander${Date.now()}`;
     const created = await request.post(`${API}/patients`, {

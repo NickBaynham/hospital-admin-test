@@ -1,24 +1,14 @@
-import { test, expect } from '@playwright/test';
-import { API, reset, getJson } from './_helpers';
+import { test, expect } from '../fixtures';
+import { API, getJson } from './_helpers';
 
 /**
- * Departments coverage (functional). The app exposes only GET (list) and POST — there is
- * no id-level GET/PUT/DELETE (a deviation from full CRUD). These assert implemented
- * behavior and should PASS. Sequential, single global DB — run via `npm run test:api`.
+ * Departments coverage (functional). The app exposes only GET (list) and POST —
+ * no id-level GET/PUT/DELETE (a deviation from full CRUD). Auto-reset via fixtures.
  */
 test.describe('Departments API', () => {
-  test.beforeEach(async ({ request }) => {
-    await reset(request);
-  });
-
-  test.afterAll(async ({ request }) => {
-    await reset(request);
-  });
-
-  test('REQ-045 lists the seeded departments', async ({ request }) => {
-    const departments = await getJson(request, '/departments');
-    expect(departments.length).toBeGreaterThanOrEqual(4);
-    expect(departments.every((d: any) => d.id && d.name)).toBeTruthy();
+  test('REQ-045 lists the seeded departments', async ({ seeded }) => {
+    expect(seeded.departments.length).toBeGreaterThanOrEqual(4);
+    expect(seeded.departments.every((d) => d.id && d.name)).toBeTruthy();
   });
 
   test('REQ-007 creates a department with a unique name', async ({ request }) => {

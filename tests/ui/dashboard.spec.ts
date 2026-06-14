@@ -1,19 +1,10 @@
-import { test, expect } from '@playwright/test';
-import { reset } from '../api/_helpers';
+import { test, expect } from '../fixtures';
 
 /**
- * Dashboard UI coverage (happy path). Asserts the seeded summary counts and the
- * upcoming-appointments table. Sequential, single global DB — run via `npm run test:ui`.
+ * Dashboard UI coverage (happy path). Auto-reset + seed data come from fixtures.
+ * Run via `npm run test:ui`.
  */
 test.describe('Dashboard page', () => {
-  test.beforeEach(async ({ request }) => {
-    await reset(request);
-  });
-
-  test.afterAll(async ({ request }) => {
-    await reset(request);
-  });
-
   test('REQ-037 shows the seeded summary counts', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('dashboard-page')).toBeVisible();
@@ -33,14 +24,16 @@ test.describe('Dashboard page', () => {
     await expect(page.getByTestId('upcoming-appointments')).toContainText('Maria Garcia');
   });
 
-  test('REQ-040 REQ-041 reflects a cancellation: count drops and row leaves upcoming', async ({ page, request }) => {
-    // Cancel the first scheduled appointment via the API, then assert the dashboard updates.
-    const appts = await (await request.get('http://localhost:8000/appointments?status=scheduled')).json();
-    const target = appts[0];
-    const patch = await request.patch(
-      `http://localhost:8000/appointments/${target.id}/status`,
-      { data: { status: 'cancelled' } },
-    );
+  test('REQ-040 REQ-041 reflects a cancellation: count drops and row leaves upcoming', async ({
+    page,
+    request,
+    seeded,
+  }) => {
+    // Cancel a scheduled appointment via the API, then assert the dashboard updates.
+    const target = seeded.appointments.find((a) => a.status === 'scheduled')!;
+    const patch = await request.patch(`${seeded.api}/appointments/${target.id}/status`, {
+      data: { status: 'cancelled' },
+    });
     expect(patch.ok()).toBeTruthy();
 
     await page.goto('/');

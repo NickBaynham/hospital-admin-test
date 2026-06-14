@@ -44,6 +44,17 @@ section 10 for the isolation constraint.
 | Regression (known defects) | `tests/regression/` | `api` |
 | UI end-to-end | `tests/ui/` | `ui` |
 
+### Fixtures and data-driven tests
+
+- `tests/fixtures.ts` — the shared Playwright fixture. An auto `resetDb` fixture seeds a
+  known state before every test (no per-spec `beforeEach`), and a `seeded` fixture exposes
+  the seed entities as typed data: `async ({ seeded }) => seeded.doctors[0]`.
+- `tests/data/validation-cases.ts` — data tables that drive validation tests. Add a row to
+  add a test; each row carries its `REQ-` id so run-results coverage still links it. Used by
+  `tests/api/patients.spec.ts` and `tests/api/appointments.spec.ts`.
+- `tests/api/_helpers.ts` — request helpers (`getJson`) and valid-payload builders
+  (`patientPayload`, `doctorPayload`, `appointmentPayload`) for overrides.
+
 ## Continuous integration
 
 `.github/workflows/playwright.yml` checks out the application repo, starts its Docker
