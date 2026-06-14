@@ -15,7 +15,7 @@ test.describe('Departments API', () => {
     await reset(request);
   });
 
-  test('REQ-050 lists the seeded departments', async ({ request }) => {
+  test('REQ-045 lists the seeded departments', async ({ request }) => {
     const departments = await getJson(request, '/departments');
     expect(departments.length).toBeGreaterThanOrEqual(4);
     expect(departments.every((d: any) => d.id && d.name)).toBeTruthy();

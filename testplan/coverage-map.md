@@ -1,8 +1,17 @@
 # Requirement → Test Coverage Map
 
-Maps each requirement (`REQ-NNN`, see
+**This is the single source of truth for coverage.** It is curated and authoritative:
+its statuses encode judgment (Partial / Implicit / N/A / Out of scope) that a mechanical
+signal cannot. Maps each requirement (`REQ-NNN`, see
 `.test-commander/documents/uploaded/requirements-structured.md`) to the automated tests
-that exercise it. Regenerate by reviewing `tests/` after adding or changing tests.
+that exercise it. Update it by reviewing `tests/` after adding or changing tests.
+
+A machine-generated companion (`.test-commander/test-plan/coverage-map.md`, produced by
+the `tc-test-plan` skill from the Playwright `results.json`) is a **disposable input**, not
+a second source of truth — it is gitignored and regenerated each run. It flattens every
+requirement with a linked passing test to `automated`; where it disagrees with this
+curated map, **this map wins**, and the discrepancy is a prompt to refine a test tag or
+reclassify here. See the run-grounded reconciliation below the table.
 
 Status legend:
 
@@ -10,6 +19,7 @@ Status legend:
 - **Automated (red)** — covered by a regression test that fails by design (known defect).
 - **Partial** — some aspect covered; see note for what is missing.
 - **Implicit** — exercised by test infrastructure (every test resets/seeds), not asserted directly.
+- **N/A** — not applicable to the implemented app (a spec deviation).
 - **Uncovered** — no test yet.
 - **Out of scope** — excluded by test plan section 3.2.
 
@@ -79,6 +89,25 @@ Status legend:
 - N/A: 1 — REQ-030 (no patient `active` field; concept not implemented)
 - Uncovered: 9 — REQ-006, 009, 021, 022, 039, 042, 043, 048, 050
 - Out of scope: 3 — REQ-003, 004, 005 (auth/roles)
+
+## Run-grounded reconciliation
+
+The `tc-test-plan` skill, fed the latest Playwright `results.json`, reports **25 automated
+(passing), 8 automated-failing, 21 planned, 0 uncovered** across the 54 requirements. That
+differs from the curated counts above, and the differences are expected, not errors:
+
+- The skill counts any requirement with a linked **passing** test as `automated` — so it
+  promotes several rows this map calls **Partial** (e.g. REQ-015, REQ-023, REQ-033, REQ-045,
+  REQ-049, REQ-051) to `automated`. This map keeps them Partial because only part of the
+  requirement is verified; the curated judgment is authoritative.
+- The skill's `automated-failing` (8) equals this map's **Automated (red)** set
+  (REQ-008/014/018/020/028/029/036/047) — the red regressions, surfaced rather than hidden.
+- The skill shows **0 uncovered** only because every requirement has a test-idea seed
+  linked in traceability; this map's **Uncovered** count reflects the absence of a real
+  *test*, which is the meaningful signal.
+
+When the two disagree, reconcile by either (a) refining a test's `REQ-` tag if it over-claims,
+or (b) reclassifying the row here. The skill is the prompt; this map is the decision.
 
 ## Highest-value gaps (recommended order)
 

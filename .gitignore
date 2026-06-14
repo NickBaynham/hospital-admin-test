@@ -9,3 +9,6 @@ node_modules/
 
 # Playwright MCP exploration artifacts (generated)
 .playwright-mcp/
+
+# Generated test-plan artifacts (source of truth is testplan/)
+.test-commander/test-plan/

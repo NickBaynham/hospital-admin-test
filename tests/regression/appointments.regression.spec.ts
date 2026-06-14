@@ -61,7 +61,7 @@ test.describe('Appointment scheduling regressions (known defects)', () => {
   });
 
   // BUG-02 / REQ-029: an inactive doctor must not be bookable.
-  test('BUG-02 REQ-029: an inactive doctor cannot be booked', async ({ request }) => {
+  test('BUG-02 REQ-014 REQ-029: an inactive doctor cannot be booked', async ({ request }) => {
     const [patients, doctors] = await Promise.all([
       getJson(request, '/patients'),
       getJson(request, '/doctors'),
