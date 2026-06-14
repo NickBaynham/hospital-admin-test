@@ -26,3 +26,4 @@ _(empty until Phase 2 ships.)_
 - [tc-explore/explore-review] [exploration-review] missing-evidence: anomaly at 2026-06-13T23:44:41Z carries no screenshot_id and no screenshot event was captured within +/- 3 seconds of the anomaly timestamp.
 - [tc-explore/explore-review] [exploration-review] missing-evidence: anomaly at 2026-06-13T23:45:01Z carries no screenshot_id and no screenshot event was captured within +/- 3 seconds of the anomaly timestamp.
 - [tc-explore/explore-review] [exploration-review] missing-evidence: anomaly at 2026-06-13T23:47:00Z carries no screenshot_id and no screenshot event was captured within +/- 3 seconds of the anomaly timestamp.
+

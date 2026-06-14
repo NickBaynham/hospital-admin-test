@@ -69,6 +69,7 @@ the UI, API, and database layers.]
 | Test-idea seeds (54) | [.test-commander/test-ideas/](../.test-commander/test-ideas/) |
 | Coverage matrix (requirements) | [requirements-coverage.md](../.test-commander/requirements/requirements-coverage.md) |
 | Coverage map (requirement -> test) | [coverage-map.md](coverage-map.md) |
+| BDD living documentation | [bdd/index.md](../.test-commander/bdd/index.md) |
 | Exploration session CH-001 | [SESS-20260613-420.md](../.test-commander/sessions/SESS-20260613-420.md) |
 | App API reference | [hospital-admin/docs/api.md](../../hospital-admin/docs/api.md) |
 | App testing notes | [hospital-admin/docs/testing.md](../../hospital-admin/docs/testing.md) |
