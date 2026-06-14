@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test --project=api --workers=1 tests/api",
+    "test:ui": "playwright test --project=ui --workers=1",
+    "test:ci": "playwright test --project=api --project=ui --workers=1 tests/api tests/ui",
+    "test:regression": "playwright test --project=api --workers=1 tests/regression"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NickBaynham/hospital-admin-test.git"

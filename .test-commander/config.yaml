@@ -1,0 +1,17 @@
+# Test Commander Configuration
+# Populated by `/tc:init` (Phase 1).
+# Project-level configuration. Defaults, feature flags, and policy overrides.
+
+tc-knowledge:
+  documents:
+    # Hospital domain entities flagged wherever they appear in prose.
+    entity-keywords:
+      - User
+      - Department
+      - Doctor
+      - Patient
+      - Appointment
+    # The requirements use "Workflows"/"behavior" headings for journeys.
+    journey-headings:
+      - workflow
+      - behavior
